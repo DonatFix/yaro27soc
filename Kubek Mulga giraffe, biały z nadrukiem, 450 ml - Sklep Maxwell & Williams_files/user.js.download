@@ -1,0 +1,174 @@
+Shop.include({
+	selectorFunctions : {
+
+
+
+        ajax_basket: {
+            selector: '.basket-contain',
+            domready: function(el) {
+                var basket = el.prev();
+                var products = el.find('.basket-product-list li');
+
+                $(window).on('resize', function () {
+                    var basketPos = basket.position();
+                    el.css({
+                        top: basketPos.top + basket.outerHeight()+ 20,
+                        left: basketPos.left - 260,
+                        width: basket.outerWidth() + 260
+                    });
+                });
+               
+
+                basket.off('mouseenter mouseleave').on('mouseenter', function() {
+                    if(el.find('.basket-product-list li').length > 0) {
+                        el.stop(true, true).slideDown('fast');
+                    }
+                }).on('mouseleave', function(e) {
+                    if(!$(e.relatedTarget).parent().is(el))
+                        el.stop(true, true).slideUp('fast');
+                });
+
+                el.off('mouseleave').on('mouseleave', function(e){
+                    if(!$(e.relatedTarget).is(basket))
+                        $(this).stop(true, true).slideUp('fast');
+                });
+            }
+        },
+
+	}
+});
+
+Shop.include({
+	selectorFunctions : {
+        boxslider2: {
+            selector: '#slider-loga',
+            load: function(slider) {
+                slider.removeClass('loading');
+
+                var _initialSlideWidth = 180,
+                    _slideWidth,
+                    _sliderWidth,
+                    _visibleSlides,
+                    _maxHeight = 0,
+                    _autoMove = true,
+                    _autoMoveDuration = Shop.useroptions.slider.automove;
+
+                if (slider.hasClass('slider_automove')) {
+                    _autoMove = true;
+                }
+
+                var slides = slider.find('.logo');
+
+                if (slides.length > 1) {
+                    var sliderWrap = $('<div class="slider-wrap" />').css('text-align', 'left');
+
+                    var nav = $('<div />').appendTo(slider);
+                    var prev = $('<span class="slider-nav-left" />').css({
+                        'display': 'none'
+                    }).appendTo(nav);
+                    var next = $('<span class="slider-nav-right" />').css({
+                        'display': 'block'
+                    }).appendTo(nav);
+
+                    slides.wrapAll(sliderWrap);
+                    sliderWrap = slider.find('.slider-wrap');
+
+                    $(window).on('resize', function() {
+                        _sliderWidth = slider.outerWidth();
+                        _visibleSlides = Math.floor(_sliderWidth / _initialSlideWidth) || 1;
+                        _slideWidth = _sliderWidth / _visibleSlides;
+
+                        slides.each(function() {
+                            if($(this).outerHeight() >= _maxHeight) {
+                                _maxHeight = $(this).outerHeight();
+                            }
+                        });
+
+
+                        slides.outerWidth(_slideWidth);
+                        sliderWrap.outerWidth((_slideWidth * slides.length) + 3).height(_maxHeight + 6);
+
+                        slides.css('left', '0');
+
+                        if(slides.length > _visibleSlides) {
+                            next.show();
+                            prev.hide();
+                        }
+                        else {
+                            next.hide();
+                            prev.hide();
+                        }
+                    }).trigger('resize');
+
+                    next.on('click', function() {
+                        slides.animate({
+                            left: "-=" + (_slideWidth)
+                        }, 400, function() {
+                            var pos = parseInt($(this).css('left'));
+
+                            if((slides.length - _visibleSlides) * Math.floor(_slideWidth) <= -pos) {
+                                next.hide();
+                            }
+
+                            if(-pos > 0) {
+                                prev.show();
+                            }
+                        });
+                    });
+
+                    prev.on('click', function() {
+                        slides.animate({
+                            left: "+=" + (_slideWidth)
+                        }, 400, function() {
+                            var pos = parseInt($(this).css('left'));
+
+                            if(-pos <= 0) {
+                                prev.hide();
+                            }
+
+                            if((slides.length - _visibleSlides) * Math.floor(_slideWidth) >= -pos) {
+                                next.show();
+                            }
+                        });
+                    });
+
+                    slider.on('swipeleft', function () {
+                        if (next.is(':visible')) {
+                            next.trigger('click');
+                        }
+                    });
+
+                    slider.on('swiperight', function () {
+                        if (prev.is(':visible')) {
+                            prev.trigger('click');
+                        }
+                    });
+
+                    if (_autoMove) {
+                        setInterval(function () {
+                            if (next.is(':visible')) {
+                                next.trigger('click');
+                            } else {
+                                slides.animate({
+                                    left: 0
+                                }, 600, function () {
+                                    next.show();
+                                    prev.hide();
+                                })
+                            }
+                        }, _autoMoveDuration)
+                    }
+                }
+            }
+        },
+
+       
+	}
+});
+
+jQuery(document).ready(function() {
+	if (jQuery('.bottom-text').html() != null) {
+		jQuery('.products.viewphot.s-row').after('<div id="bottom-text" class="categorydesc resetcss row" style="text-align:justify;">' + jQuery('.bottom-text').html() + '</div>');
+		jQuery('.bottom-text').remove();
+	}
+});
